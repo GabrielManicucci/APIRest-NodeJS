@@ -4,7 +4,18 @@ import { randomUUID } from 'node:crypto'
 import { z } from 'zod'
 import { checkSessionIdExists } from '../middlewares/check-session-id-exists'
 
+// Testes unitários: unidades de código
+// Testes integração comunicação entre unidades
+// Testes e2e: ponta a ponta, simulam um usuário operando a aplicação
+
+// Pirâmide de teste ( Poucos testes e2e, testes de integração e muitos testes unitários)
+
 export async function transactionsRoutes(app: FastifyInstance) {
+  // hook global in transactions
+  app.addHook('preHandler', async (request) => {
+    console.log(`[${request.method}, ${request.url}]`)
+  })
+
   app.get('/', { preHandler: [checkSessionIdExists] }, async () => {
     const transactions = await knex('transactions').select()
     return { transactions }
@@ -44,6 +55,8 @@ export async function transactionsRoutes(app: FastifyInstance) {
 
   app.post('/', async (request, reply) => {
     // { title, amount, type: credit ou debit}
+
+    // console.log(request.body)
 
     const createRequestBodySchema = z.object({
       title: z.string(),
